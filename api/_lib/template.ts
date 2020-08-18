@@ -104,7 +104,7 @@ function getCss(theme: string, fontSize: string) {
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { text, theme, md, fontSize, images, widths, heights } = parsedReq;
+    const { text, city, salary, theme, md, fontSize, images, widths, heights } = parsedReq;
     return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
@@ -125,6 +125,15 @@ export function getHtml(parsedReq: ParsedRequest) {
             <div class="heading">${emojify(
                 md ? marked(text) : sanitizeHtml(text)
             )}
+            </div>
+                        <div class="heading">${emojify(
+        md ? marked(city) : sanitizeHtml(city)
+    )}
+            </div>
+                        </div>
+                        <div class="heading">${emojify(
+        md ? marked(salary) : sanitizeHtml(salary)
+    )}
             </div>
         </div>
     </body>
