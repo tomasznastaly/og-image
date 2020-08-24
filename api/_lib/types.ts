@@ -3,13 +3,9 @@ export type Theme = 'light' | 'dark';
 
 export interface ParsedRequest {
     fileType: FileType;
-    text: string;
+    title: string;
+    companyName: string;
+    logoUrl: string;
     city: string;
     salary: string;
-    theme: Theme;
-    md: boolean;
-    fontSize: string;
-    images: string[];
-    widths: string[];
-    heights: string[];
 }

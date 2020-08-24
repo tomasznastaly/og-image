@@ -1,57 +1,42 @@
+import {readFileSync} from 'fs';
+import {sanitizeHtml} from './sanitizer';
+import {ParsedRequest} from './types';
 
-import { readFileSync } from 'fs';
-import marked from 'marked';
-import { sanitizeHtml } from './sanitizer';
-import { ParsedRequest } from './types';
-const twemoji = require('twemoji');
-const twOptions = { folder: 'svg', ext: '.svg' };
-const emojify = (text: string) => twemoji.parse(text, twOptions);
+const rglr = readFileSync(`${__dirname}/../_fonts/OpenSans-Regular.ttf`).toString('base64');
+const bold = readFileSync(`${__dirname}/../_fonts/OpenSans-Bold.ttf`).toString('base64');
+const background = 'data:image/png;base64,' + readFileSync(`${__dirname}/../images/bg.png`).toString('base64');
+const workIcon = 'data:image/png;base64,' + readFileSync(`${__dirname}/../images/baseline_work_white_18dp.png`).toString('base64');
+const locationIcon = 'data:image/png;base64,' + readFileSync(`${__dirname}/../images/baseline_location_on_white_18dp.png`).toString('base64');
+const moneyIcon = 'data:image/png;base64,' + readFileSync(`${__dirname}/../images/baseline_local_atm_white_18dp.png`).toString('base64');
+const jainzynierLogo = 'data:image/png;base64,' + readFileSync(`${__dirname}/../images/jainzynierlogo.png`).toString('base64');
 
-const rglr = readFileSync(`${__dirname}/../_fonts/Inter-Regular.woff2`).toString('base64');
-const bold = readFileSync(`${__dirname}/../_fonts/Inter-Bold.woff2`).toString('base64');
-const mono = readFileSync(`${__dirname}/../_fonts/Vera-Mono.woff2`).toString('base64');
-
-function getCss(theme: string, fontSize: string) {
-    let background = 'white';
-    let foreground = 'black';
-    let radial = 'lightgray';
-
-    if (theme === 'dark') {
-        background = 'black';
-        foreground = 'white';
-        radial = 'dimgray';
-    }
+function getCss() {
     return `
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Open Sans';
         font-style:  normal;
         font-weight: normal;
-        src: url(data:font/woff2;charset=utf-8;base64,${rglr}) format('woff2');
+        src: url(data:font/ttf;charset=utf-8;base64,${rglr});
     }
 
     @font-face {
-        font-family: 'Inter';
+        font-family: 'Open Sans';
         font-style:  normal;
         font-weight: bold;
-        src: url(data:font/woff2;charset=utf-8;base64,${bold}) format('woff2');
+        src: url(data:font/ttf;charset=utf-8;base64,${bold});
     }
 
-    @font-face {
-        font-family: 'Vera';
-        font-style: normal;
-        font-weight: normal;
-        src: url(data:font/woff2;charset=utf-8;base64,${mono})  format("woff2");
-      }
+    .img-fluid {
+      max-width: 100%;
+      height: auto;
+    }
 
     body {
-        background: ${background};
-        background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
-        background-size: 100px 100px;
         height: 100vh;
-        display: flex;
-        text-align: center;
-        align-items: center;
-        justify-content: center;
+        font-family: 'Open Sans';
+          background-image: url(${background});
+          background-repeat: no-repeat; /* Do not repeat the image */
+          background-size: cover;
     }
 
     code {
@@ -71,10 +56,9 @@ function getCss(theme: string, fontSize: string) {
         align-content: center;
         justify-content: center;
         justify-items: center;
-    }
-
-    .logo {
-        margin: 0 75px;
+        width: 180px;
+        height: 180px;
+        background: white;
     }
 
     .plus {
@@ -84,9 +68,54 @@ function getCss(theme: string, fontSize: string) {
     }
 
     .spacer {
-        margin: 150px;
+          height: 6px;
+          width: 60px;
+          background-color: rgba(240,200,5,1);
+          margin-top: 30px;
+          margin-bottom: 30px;
     }
 
+    .company-name {
+          color: rgba(83,123,206,1);
+          font-size: 30px;
+          font-weight: 600;
+          letter-spacing: 0.27px;
+          line-height: 60px;
+    }
+    
+    .icon {
+      height: 30px;
+      position: relative;
+      top: 5px;
+      opacity: 0.6;
+      margin-right: 8px;
+    }
+    
+    .cover {
+          padding: 70px;
+    }
+    
+    .apply-btn {
+        color: rgba(38,38,38,1);
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 0.2px;
+      line-height: 80px;
+      text-align: center;
+      height: 80px;
+      width: 290px;
+        background-color: rgba(255,212,0,1);
+    }
+    
+    .salary,
+    .city {
+      color: rgba(255,255,255,1);
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: 0.27px;
+      line-height: 60px;
+    }
+    
     .emoji {
         height: 1em;
         width: 1em;
@@ -94,62 +123,81 @@ function getCss(theme: string, fontSize: string) {
         vertical-align: -0.1em;
     }
     
-    .heading {
-        font-family: 'Inter', sans-serif;
-        font-size: ${sanitizeHtml(fontSize)};
-        font-style: normal;
-        color: ${foreground};
-        line-height: 1.8;
+    .title {
+    width: 100%;
+          color: rgba(255,255,255,1);
+          font-size: 46px;
+          font-weight: bold;
+          letter-spacing: 0.55px;
+          line-height: 66px;
     }`;
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { text, city, salary, theme, md, fontSize, images, widths, heights } = parsedReq;
+    const {title, city, salary, logoUrl, companyName} = parsedReq;
+    const logo = logoUrl === 'null' || logoUrl === 'undefined' ? null : logoUrl;
     return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
     <title>Generated Image</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        ${getCss(theme, fontSize)}
+        ${getCss()}
     </style>
     <body>
-        <div>
-            <div class="spacer">
-            <div class="logo-wrapper">
-                ${images.map((img, i) =>
-                    getPlusSign(i) + getImage(img, widths[i], heights[i])
-                ).join('')}
+        <div class="cover">
+            <div style="display:flex;">
+                <div style="width:100%;">
+                  <div class="title">${sanitizeHtml(title)}</div>
+                  <div class="spacer"></div>
+                  <div class="company-name">
+                    <img
+                        class="icon"
+                        src="${workIcon}"
+                    />
+                    ${sanitizeHtml(companyName)}</div>
+                    <div class="city">
+                    <img
+                        class="icon"
+                        src="${locationIcon}"
+                    />
+                    ${sanitizeHtml(city)}</div>
+                    <div class="salary">
+                    <img
+                        class="icon"
+                        src="${moneyIcon}"
+                    />
+                    ${sanitizeHtml(salary)}</div> 
+                </div>
+     
+                <div style="flex: 0 0 200px;display:${logo ? 'block' : 'none'}">
+                    <div class="logo-wrapper">
+                       <img
+                            class="logo img-fluid"
+                            src="${logo}"
+                        />
+                    </div>
+
+                </div>
             </div>
-            <div class="spacer">
-            <div class="heading">${emojify(
-                md ? marked(text) : sanitizeHtml(text)
-            )}
+            
+            <div style="position: fixed;bottom: 60px;left: 70px;right: 70px">
+                        <div style="display:flex;align-items: center;">
+                <div style="flex:1 1 100%;"></div>
+                <div style="flex:1 1 100%;"><div class="apply-btn">Aplikuj teraz</div></div>
+                <div style="flex:1 1 100%;text-align: right">
+                    <img
+                        class="img-fluid"
+                        style="height:40px"
+                        alt="jainzynier.pl logo"
+                        src="${jainzynierLogo}"
+                    />
+                </div>
             </div>
-                        <div class="heading">${emojify(
-        md ? marked(city) : sanitizeHtml(city)
-    )}
             </div>
-                        </div>
-                        <div class="heading">${emojify(
-        md ? marked(salary) : sanitizeHtml(salary)
-    )}
-            </div>
+
+
         </div>
     </body>
 </html>`;
-}
-
-function getImage(src: string, width ='auto', height = '225') {
-    return `<img
-        class="logo"
-        alt="Generated Image"
-        src="${sanitizeHtml(src)}"
-        width="${sanitizeHtml(width)}"
-        height="${sanitizeHtml(height)}"
-    />`
-}
-
-function getPlusSign(i: number) {
-    return i === 0 ? '' : '<div class="plus">+</div>';
 }
