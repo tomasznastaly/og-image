@@ -124,7 +124,8 @@ function getCss() {
     }
     
     .title {
-    width: 100%;
+            width: 100%;
+            padding-right: 15px;
           color: rgba(255,255,255,1);
           font-size: 46px;
           font-weight: bold;
@@ -170,7 +171,7 @@ export function getHtml(parsedReq: ParsedRequest) {
                     ${sanitizeHtml(salary)}</div> 
                 </div>
      
-                <div style="flex: 0 0 200px;display:${logo ? 'block' : 'none'}">
+                <div style="flex: 0 0 180px;display:${logo ? 'block' : 'none'}">
                     <div class="logo-wrapper">
                        <img
                             class="logo img-fluid"
